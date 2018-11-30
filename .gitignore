@@ -1,0 +1,14 @@
+obj/
+packages/
+Debug/
+Release/
+*sdf
+*suo
+*.user
+*.opendb
+*.VC.db
+.vs/
+
+nuget.config
+project.lock.json
+/update.cmd
