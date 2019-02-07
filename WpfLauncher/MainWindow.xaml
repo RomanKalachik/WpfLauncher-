@@ -11,7 +11,7 @@
     Title="Perforator">
 
     <StackPanel Orientation="Vertical" >
-        <StackPanel Background="{Binding FPSColor}" TextBlock.FontSize="40">
+        <StackPanel Background="{Binding FPSColor}" TextBlock.FontSize="40" Orientation="Horizontal">
             <TextBlock>FPS:</TextBlock>
             <TextBlock Text="{Binding FPS}" />
         </StackPanel>
