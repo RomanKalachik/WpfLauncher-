@@ -4,11 +4,13 @@ using Microsoft.WpfPerformance.Data;
 using Microsoft.WpfPerformance.Diagnostics;
 using Microsoft.WpfPerformance.Threading;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -29,6 +31,11 @@ namespace WpfLauncher
 
         public static readonly DependencyProperty FPSProperty =
             DependencyProperty.Register("FPS", typeof(double), typeof(MainWindow));
+        public static readonly DependencyProperty PercentElapsedTimeForCompositionProperty =
+            DependencyProperty.Register("PercentElapsedTimeForComposition", typeof(double), typeof(MainWindow));
+        public static readonly DependencyProperty PathDataProperty =
+            DependencyProperty.Register("PathData", typeof(Geometry), typeof(MainWindow));
+
         public static readonly IntPtr HKEY_LOCAL_MACHINE = (IntPtr)(-2147483646);
         Process attachedProcess = null;
         ClrVersion clrVersion = ClrVersion.AnyClr;
@@ -42,6 +49,8 @@ namespace WpfLauncher
             InitializeComponent();
             IsDebugControlEnabled = true;
             Loaded += MainWindow_Loaded;
+            fpsData = new Queue<double>();
+            for (int i = 0; i < 100; i++) fpsData.Enqueue(0.0);
         }
 
         bool AttachToProcess(SelectProcessArgs selectProcessArgs)
@@ -124,20 +133,30 @@ namespace WpfLauncher
             }
         }
 
-        private void UpdateCompositorOwnedData()
-        {
+        private void UpdateCompositorOwnedData() {
             int num = 0;
             int num2 = 0;
-            if (IsAttached)
-            {
+            if(IsAttached) {
+                PercentElapsedTimeForComposition = mediaControl.PercentElapsedTimeForComposition;
                 num = mediaControl.FrameRate;
                 num2 = mediaControl.DirtyRectAddRate;
             }
             FPS = num;
             FPSColor = num < 10 ? Brushes.Red : Brushes.Green;
+            UpdatePathData(FPS);
         }
-
-
+        Queue<double> fpsData;
+        protected void UpdatePathData(double fps) {
+            fpsData.Dequeue();
+            fpsData.Enqueue(fps);
+            StringBuilder sb = new StringBuilder();
+            sb.Append("M 0,0 L 0,100 ");
+            int counter = 0;
+            foreach(var cfps in fpsData) {
+                sb.Append(string.Format("{0},{1} ", counter++, 100- Math.Min(100, cfps)));
+            }
+            PathData = Geometry.Parse(sb.ToString());
+        }
 
         private static WorkStatus WorkUntilCanAttach(object arg, WorkItem workItem)
         {
@@ -248,7 +267,14 @@ namespace WpfLauncher
             set { SetValue(FPSProperty, value); }
         }
 
-
+        public double PercentElapsedTimeForComposition {
+            get { return (double)GetValue(PercentElapsedTimeForCompositionProperty); }
+            set { SetValue(PercentElapsedTimeForCompositionProperty, value); }
+        }
+        public Geometry PathData {
+            get { return (Geometry)GetValue(PathDataProperty); }
+            set { SetValue(PathDataProperty, value); }
+        }
         public SolidColorBrush FPSColor {
             get { return (SolidColorBrush)GetValue(FPSColorProperty); }
             set { SetValue(FPSColorProperty, value); }

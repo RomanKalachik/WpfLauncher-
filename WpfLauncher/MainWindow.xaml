@@ -10,11 +10,19 @@
     SizeToContent="WidthAndHeight"
     Title="Perforator">
 
-    <StackPanel Orientation="Vertical" >
+    <StackPanel Orientation="Vertical" Margin="5">
+        <Border Background="White" Margin="2" Width="300" Height="100">
+            <Path Data="{Binding PathData}" Stretch="Fill"  Stroke="Black" StrokeThickness="1" ></Path>
+        </Border>
         <StackPanel Background="{Binding FPSColor}" TextBlock.FontSize="40" Orientation="Horizontal">
             <TextBlock>FPS:</TextBlock>
             <TextBlock Text="{Binding FPS}" />
         </StackPanel>
+        <StackPanel Background="{Binding PercentElapsedTimeForComposition}" TextBlock.FontSize="30" Orientation="Horizontal">
+            <TextBlock>PercentElapsedTimeForComposition:</TextBlock>
+            <TextBlock Text="{Binding PercentElapsedTimeForComposition}" />
+        </StackPanel>
+
         <StackPanel Margin="20"
             Orientation="Horizontal"
             TextBlock.FontSize="12">
