@@ -227,7 +227,7 @@ namespace WpfLauncher
         {
             base.DataContext = this;
             updateTimer = new DispatcherTimer(DispatcherPriority.Normal);
-            updateTimer.Interval = new TimeSpan(0, 0, 0, 0, 100);
+            updateTimer.Interval = new TimeSpan(0, 0, 0, 0, 1000/100);
             updateTimer.Tick += OnUpdateTimer;
             base.OnInitialized(e);
         }
