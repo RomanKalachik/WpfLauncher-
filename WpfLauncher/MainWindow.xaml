@@ -4,19 +4,27 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:WpfLauncher"
     Width="800"
     Height="450" 
     mc:Ignorable="d"
     SizeToContent="WidthAndHeight"
     Title="Perforator">
+    <Window.Resources>
+        <local:FpsToColorConverter x:Key="fpsToColorConverter"/>
+    </Window.Resources>
 
     <StackPanel Orientation="Vertical" Margin="5">
         <Border Background="White" Margin="2" Width="500" Height="100">
             <Path Data="{Binding PathData}" Stretch="Fill"  Stroke="Black" StrokeThickness="1" ></Path>
         </Border>
-        <StackPanel Background="{Binding FPSColor}" TextBlock.FontSize="40" Orientation="Horizontal">
+        <StackPanel Background="{Binding FPS, Converter={StaticResource fpsToColorConverter}}" TextBlock.FontSize="40" Orientation="Horizontal">
             <TextBlock>FPS:</TextBlock>
             <TextBlock Text="{Binding FPS}" />
+        </StackPanel>
+        <StackPanel Background="{Binding AverageFPS, Converter={StaticResource fpsToColorConverter}}" TextBlock.FontSize="40" Orientation="Horizontal">
+            <TextBlock>Average FPS:</TextBlock>
+            <TextBlock Text="{Binding AverageFPS}" />
         </StackPanel>
         <StackPanel Background="{Binding PercentElapsedTimeForComposition}" TextBlock.FontSize="30" Orientation="Horizontal">
             <TextBlock>PercentElapsedTimeForComposition:</TextBlock>
