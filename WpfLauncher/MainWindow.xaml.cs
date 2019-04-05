@@ -7,12 +7,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -25,12 +27,11 @@ namespace WpfLauncher
     {
         public static readonly DependencyProperty CpuLimitPercentProperty =
             DependencyProperty.Register("CpuLimitPercent", typeof(int), typeof(Window), new PropertyMetadata(100, new PropertyChangedCallback(CpuLimitChanged)));
-
-        public static readonly DependencyProperty FPSColorProperty =
-            DependencyProperty.Register("FPSColor", typeof(SolidColorBrush), typeof(MainWindow));
-
+        
         public static readonly DependencyProperty FPSProperty =
             DependencyProperty.Register("FPS", typeof(double), typeof(MainWindow));
+        public static readonly DependencyProperty AverageFPSProperty =
+            DependencyProperty.Register("AverageFPS", typeof(double), typeof(MainWindow));
         public static readonly DependencyProperty PercentElapsedTimeForCompositionProperty =
             DependencyProperty.Register("PercentElapsedTimeForComposition", typeof(double), typeof(MainWindow));
         public static readonly DependencyProperty PathDataProperty =
@@ -40,6 +41,7 @@ namespace WpfLauncher
         Process attachedProcess = null;
         ClrVersion clrVersion = ClrVersion.AnyClr;
         Job job;
+        double fpsTotal = 0.0;
 
         MediaControl mediaControl;
         private DispatcherTimer updateTimer;
@@ -142,13 +144,14 @@ namespace WpfLauncher
                 num2 = mediaControl.DirtyRectAddRate;
             }
             FPS = num;
-            FPSColor = num < 10 ? Brushes.Red : Brushes.Green;
             UpdatePathData(FPS);
         }
         Queue<double> fpsData;
         protected void UpdatePathData(double fps) {
-            fpsData.Dequeue();
+            fpsTotal -= fpsData.Dequeue();
+            fpsTotal += fps;
             fpsData.Enqueue(fps);
+            AverageFPS = fpsTotal / 100;
             StringBuilder sb = new StringBuilder();
             sb.Append("M 0,0 L 0,100 ");
             int counter = 0;
@@ -266,6 +269,10 @@ namespace WpfLauncher
             get { return (double)GetValue(FPSProperty); }
             set { SetValue(FPSProperty, value); }
         }
+        public double AverageFPS {
+            get { return (double)GetValue(AverageFPSProperty); }
+            set { SetValue(AverageFPSProperty, value); }
+        }
 
         public double PercentElapsedTimeForComposition {
             get { return (double)GetValue(PercentElapsedTimeForCompositionProperty); }
@@ -275,11 +282,17 @@ namespace WpfLauncher
             get { return (Geometry)GetValue(PathDataProperty); }
             set { SetValue(PathDataProperty, value); }
         }
-        public SolidColorBrush FPSColor {
-            get { return (SolidColorBrush)GetValue(FPSColorProperty); }
-            set { SetValue(FPSColorProperty, value); }
-        }
 
         public bool IsAttached { get; private set; }
+    }
+
+    public class FpsToColorConverter : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+            double fps = (double)value;
+            return fps < 10 ? Brushes.Red : Brushes.Green;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
+            throw new NotImplementedException();
+        }
     }
 }
